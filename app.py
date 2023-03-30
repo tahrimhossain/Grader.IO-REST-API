@@ -345,15 +345,20 @@ class SummaryOfSubmissions(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])	
 			cursor.callproc('getSummaryOfSubmissionsInAssignment',(assignmentId,))
 			result = cursor.fetchone()
-			return {"submissions":result[0]}
+			cursor.callproc('getAssignmentDetail',(assignmentId,))
+			detail = cursor.fetchone()
+			return {"current_state":detail[0]["current_state"],"submissions":result[0]}
 		except Unauthorized	as e:
 			abort(401,message=e.description)
 		except InvalidSignatureError as e:
 			abort(498,message="Invalid token")
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')	
-		except Exception as e:		
-			abort(400,message = "Could not process request")
+		except Exception as e:
+			if isinstance(e,Error) and  'ASSIGNMENT NOT FOUND' in e.pgerror:
+				abort(404,message = 'Assignment not found')		
+			else:
+				abort(400,message = "Could not process request")		
 		finally:
 			cursor.close()
 			pool.putconn(connection)
@@ -424,7 +429,7 @@ class SummaryOfSubmissionReviews(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])	
 			cursor.callproc('getSummaryOfSubmissionReviews',(submissionId,))
 			result = cursor.fetchone()
-			return result[0]	
+			return {"reviews":result[0]}	
 		except Unauthorized	as e:
 			abort(401,message=e.description)
 		except InvalidSignatureError as e:
