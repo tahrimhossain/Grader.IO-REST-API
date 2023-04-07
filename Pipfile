@@ -9,6 +9,8 @@ flask-restful = "*"
 pyjwt = "*"
 marshmallow = "*"
 flask-cors = "*"
+bcrypt = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

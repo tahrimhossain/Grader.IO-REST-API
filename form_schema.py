@@ -32,4 +32,21 @@ class ScoreUpdationFormSchema(Schema):
 
 class ScorePublicationFormSchema(Schema):
 	assignment_id = fields.Int(required=True)
+
+
+class JoinClassroomFormSchema(Schema):
+	classroomCode = fields.Str(required=True)
+
+class ReviewSubmissionFormSchema(Schema):
+	submission_id = fields.Int(required=True)
+	assigned_score = fields.Int(required=True)
+	content = fields.Str(required=True)
+
+class SaveSubmissionFormSchema(Schema):
+	assignment_id = fields.Int(required = True)
+	content = fields.Str(required = True)
+
+class SubmitSubmissionFormSchema(Schema):
+	assignment_id = fields.Int(required = True)
+	content = fields.Str(required = True)				
 						
