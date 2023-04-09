@@ -19,16 +19,14 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
-load_dotenv()
-access_token_secret_key = os.environ.get("ACCESS_TOKEN_SECRET_KEY")
-user = os.environ.get("USER")
-password = os.environ.get("PASSWORD")
-host = os.environ.get("HOST")
-port = os.environ.get("PORT")
-database = os.environ.get("DATABASE")
+with open('secrets.json') as secrets_file:
+    secrets = json.load(secrets_file)
 
-pool = psycopg2.pool.SimpleConnectionPool(1,50,user=user,password=password,host=host,port=port,database=database)
+access_token_secret_key = secrets["access_token_secret_key"]
+pool = psycopg2.pool.SimpleConnectionPool(1,50,user=secrets["user"],password=secrets["password"],host=secrets["host"],port=secrets["port"],database=secrets["database"])
 
+registration_form_schema = form_schema.RegistrationFormSchema()
+log_in_form_schema = form_schema.LogInFormSchema()
 registration_form_schema = form_schema.RegistrationFormSchema()
 log_in_form_schema = form_schema.LogInFormSchema()
 classroom_creation_form_schema = form_schema.ClassroomCreationFormSchema()
