@@ -10,7 +10,8 @@ pyjwt = "*"
 marshmallow = "*"
 flask-cors = "*"
 bcrypt = "*"
-python-dotenv = "*"
+python-dotenv = "==0.21.1"
+gunicorn = "*"
 
 [dev-packages]
 

@@ -11,17 +11,23 @@ import form_schema
 from werkzeug.exceptions import BadRequest,Unauthorized,NotFound,Conflict
 from jwt.exceptions import InvalidSignatureError,ExpiredSignatureError
 import bcrypt
+from dotenv import load_dotenv
+import os
 
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
-with open('secrets.json') as secrets_file:
-    secrets = json.load(secrets_file)
+load_dotenv()
+access_token_secret_key = os.environ.get("ACCESS_TOKEN_SECRET_KEY")
+user = os.environ.get("USER")
+password = os.environ.get("PASSWORD")
+host = os.environ.get("HOST")
+port = os.environ.get("PORT")
+database = os.environ.get("DATABASE")
 
-access_token_secret_key = secrets["access_token_secret_key"]
-pool = psycopg2.pool.SimpleConnectionPool(1,50,user=secrets["user"],password=secrets["password"],host=secrets["host"],port=secrets["port"],database=secrets["database"])
+pool = psycopg2.pool.SimpleConnectionPool(1,50,user=user,password=password,host=host,port=port,database=database)
 
 registration_form_schema = form_schema.RegistrationFormSchema()
 log_in_form_schema = form_schema.LogInFormSchema()
@@ -438,7 +444,7 @@ class SubmissionDetail(Resource):
 			cursor.callproc('getSubmissionDetail',(submissionId,))
 			submission_detail = cursor.fetchone()
 
-			print(submission_detail[0]['assignment_id'])
+			
 
 			cursor.callproc('isUserCreatorOfAssignment',(submission_detail[0]['assignment_id'],payload['email'],))
 			creator_of_assignment = cursor.fetchone()
@@ -446,7 +452,7 @@ class SubmissionDetail(Resource):
 			cursor.callproc('isUserReviewerOfSubmission',(submissionId,payload['email'],))
 			reviewer_of_submission = cursor.fetchone()
 
-			print(reviewer_of_submission)
+			
 
 			cursor.callproc('isUserCreatorOfSubmission',(submissionId,payload['email'],))
 			creator_of_submission = cursor.fetchone()
@@ -682,7 +688,6 @@ class CreatedSubmissionDetail(Resource):
 				submission_detail = cursor.fetchone()
 				return {"current_state_of_assignment":assignment_detail[0]["current_state"],"detail":submission_detail[0]}		
 			except Exception as e:
-				print(e)
 				return {"current_state_of_assignment":assignment_detail[0]["current_state"],"detail":None}					
 		except Unauthorized	as e:
 			abort(401,message=e.description)
@@ -718,7 +723,6 @@ class SummaryOfReviewsGottenForCreatedSubmission(Resource):
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')	
 		except Exception as e:
-			print(e)
 			abort(400,message = "Could not process request")	
 		finally:
 			cursor.close()
