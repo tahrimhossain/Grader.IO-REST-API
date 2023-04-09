@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-psycopg2 = "*"
+psycopg2 = "==2.9.4"
 flask-restful = "*"
 pyjwt = "*"
 marshmallow = "*"
