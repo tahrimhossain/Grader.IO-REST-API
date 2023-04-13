@@ -338,6 +338,7 @@ class CreateClassroom(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL createClassRoom(%s,%s,%s)',(payload['email'],data['name'],data['description']))
 			connection.commit()
+			return {"message":"Successfully created"}
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -370,6 +371,7 @@ class CreateAssignment(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL createAssignment(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(payload['email'],data['code'],data['title'],data['description'],data['instructions'],data['max_score'],data['number_of_reviewers_per_submission'],data['submission_deadline'],data['review_deadline']))
 			connection.commit()
+			return {"message":"Successfully created"}
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -572,6 +574,7 @@ class UpdateFinalScore(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL updateFinalScore(%s,%s)',(data['submission_id'],data['final_score']))
 			connection.commit()
+			return {"message":"Successfully updated"}
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -600,6 +603,7 @@ class PublishScore(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL publishScore(%s)',(data['assignment_id']))
 			connection.commit()
+			return {"message":"Successfully published"}
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -639,6 +643,7 @@ class JoinClassroom(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL joinClassRoom(%s,%s)',(payload['email'],data['classroom_code']))
 			connection.commit()
+			return {"message":"Successfully joined"}
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
@@ -844,6 +849,7 @@ class SubmitReview(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL submitReview(%s,%s,%s,%s)',(data['submission_id'],payload['email'],data['assigned_score'],data['content']))
 			connection.commit()
+			return {"message":"Successfully submitted"}
 		except Unauthorized	as e:
 			abort(401,message=e.description)	
 		except InvalidSignatureError as e:
@@ -878,6 +884,7 @@ class SaveSubmission(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL saveSubmission(%s,%s,%s)',(data['assignment_id'],payload['email'],data['content']))
 			connection.commit()
+			return {"message":"Successfully saved"}
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
@@ -916,6 +923,7 @@ class SubmitSubmission(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL submitSubmission(%s,%s,%s)',(data['assignment_id'],payload['email'],data['content']))
 			connection.commit()
+			return {"message":"Successfully submitted"}
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
