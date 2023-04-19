@@ -502,9 +502,12 @@ class SubmissionGrade(Resource):
 			if creator[0] == False:
 				raise Unauthorized("Unauthorized action")
 
+			cursor.callproc('getAssignmentDetail',(assignmentId,))
+			assignment_detail = cursor.fetchone()
+
 			cursor.callproc('getSubmissionGrade',(submissionId,))
 			result = cursor.fetchone()
-			return result[0]
+			return {"assignment_state":assignment_detail[0]["current_state"],"grade":result[0]}
 
 		except Unauthorized	as e:
 			abort(401,message=e.description)
@@ -572,6 +575,17 @@ class UpdateFinalScore(Resource):
 			if token == None:
 				raise Unauthorized("Authorization required")	
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
+			
+			cursor.callproc('getSubmissionDetail',(data['submission_id'],))
+			submission_detail = cursor.fetchone()
+
+			cursor.callproc('isUserCreatorOfAssignment',(submission_detail[0]['assignment_id'],payload['email'],))
+			creator = cursor.fetchone()
+			
+			if creator[0] == False:
+				raise Unauthorized("Unauthorized action")
+
+
 			cursor.execute('CALL updateFinalScore(%s,%s)',(data['submission_id'],data['final_score']))
 			connection.commit()
 			return {"message":"Successfully updated"}
@@ -601,9 +615,18 @@ class PublishScore(Resource):
 			if token == None:
 				raise Unauthorized("Authorization required")	
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
+			
+			cursor.callproc('isUserCreatorOfAssignment',(data['assignment_id'],payload['email'],))
+			creator = cursor.fetchone()
+			
+			if creator[0] == False:
+				raise Unauthorized("Unauthorized action")
+
 			cursor.execute('CALL publishScore(%s)',(data['assignment_id']))
 			connection.commit()
+
 			return {"message":"Successfully published"}
+
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -613,12 +636,7 @@ class PublishScore(Resource):
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')			
 		except Exception as e:
-			if e is jwt.exceptions.InvalidSignatureError:
-				abort(498,message='Invalid token')
-			elif e is jwt.exceptions.ExpiredSignatureError:
-				abort(401,message='Authorization required')
-			else:
-				abort(400,message = "Could not process request")
+			abort(400,message = "Could not process request")
 		finally:
 			cursor.close()
 			pool.putconn(connection)			
