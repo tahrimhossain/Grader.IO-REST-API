@@ -35,7 +35,7 @@ class ScorePublicationFormSchema(Schema):
 
 
 class JoinClassroomFormSchema(Schema):
-	classroomCode = fields.Str(required=True)
+	classroom_code = fields.Str(required=True)
 
 class ReviewSubmissionFormSchema(Schema):
 	submission_id = fields.Int(required=True)
