@@ -502,7 +502,7 @@ class SubmissionGrade(Resource):
 			if creator[0] == False:
 				raise Unauthorized("Unauthorized action")
 
-			cursor.callproc('getAssignmentDetail',(assignmentId,))
+			cursor.callproc('getAssignmentDetail',(submission_detail[0]['assignment_id'],))
 			assignment_detail = cursor.fetchone()
 
 			cursor.callproc('getSubmissionGrade',(submissionId,))
