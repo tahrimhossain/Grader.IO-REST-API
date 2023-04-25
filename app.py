@@ -19,8 +19,8 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
-#/etc/secrets/secrets.json
-with open('secrets.json') as secrets_file:
+
+with open('/etc/secrets/secrets.json') as secrets_file:
     secrets = json.load(secrets_file)
 
 access_token_secret_key = secrets["access_token_secret_key"]
