@@ -19,6 +19,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
+
 with open('/etc/secrets/secrets.json') as secrets_file:
     secrets = json.load(secrets_file)
 
@@ -336,9 +337,10 @@ class CreateClassroom(Resource):
 			if token == None:
 				raise Unauthorized("Authorization required")
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
-			cursor.execute('CALL createClassRoom(%s,%s,%s)',(payload['email'],data['name'],data['description']))
+			cursor.callproc('createClassRoom',(payload['email'],data['name'],data['description'],))
 			connection.commit()
-			return {"message":"Successfully created"}
+			result = cursor.fetchone()
+			return result[0]
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
@@ -348,6 +350,7 @@ class CreateClassroom(Resource):
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')	
 		except Exception as e:
+			print(e)
 			if isinstance(e,Error) and  'USER NOT FOUND' in e.pgerror:
 				abort(404,message = 'User not found')				
 			else:
@@ -598,6 +601,7 @@ class UpdateFinalScore(Resource):
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')		
 		except Exception as e:
+			print(e)
 			abort(400,message = "Could not process request")
 		finally:
 			cursor.close()
