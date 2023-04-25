@@ -19,8 +19,8 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
-
-with open('/etc/secrets/secrets.json') as secrets_file:
+#/etc/secrets/secrets.json
+with open('secrets.json') as secrets_file:
     secrets = json.load(secrets_file)
 
 access_token_secret_key = secrets["access_token_secret_key"]
@@ -663,9 +663,10 @@ class JoinClassroom(Resource):
 			if token == None:
 				raise Unauthorized("Authorization required")	
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
-			cursor.execute('CALL joinClassRoom(%s,%s)',(payload['email'],data['classroom_code']))
+			cursor.callproc('joinClassRoom',(payload['email'],data['classroom_code'],))
 			connection.commit()
-			return {"message":"Successfully joined"}
+			result = cursor.fetchone()
+			return result[0]
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
