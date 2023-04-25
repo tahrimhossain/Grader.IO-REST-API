@@ -626,7 +626,7 @@ class PublishScore(Resource):
 			if creator[0] == False:
 				raise Unauthorized("Unauthorized action")
 
-			cursor.execute('CALL publishScore(%s)',(data['assignment_id']))
+			cursor.execute('CALL publishScore(%s)',(data['assignment_id'],))
 			connection.commit()
 
 			return {"message":"Successfully published"}
@@ -640,6 +640,7 @@ class PublishScore(Resource):
 		except ExpiredSignatureError as e:
 			abort(401,message='Token expired')			
 		except Exception as e:
+			print(e)
 			abort(400,message = "Could not process request")
 		finally:
 			cursor.close()
