@@ -372,9 +372,10 @@ class CreateAssignment(Resource):
 			if token == None:
 				raise Unauthorized("Authorization required")
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
-			cursor.execute('CALL createAssignment(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(payload['email'],data['code'],data['title'],data['description'],data['instructions'],data['max_score'],data['number_of_reviewers_per_submission'],data['submission_deadline'],data['review_deadline']))
+			cursor.callproc('createAssignment',(payload['email'],data['code'],data['title'],data['description'],data['instructions'],data['max_score'],data['number_of_reviewers_per_submission'],data['submission_deadline'],data['review_deadline'],))
 			connection.commit()
-			return {"message":"Successfully created"}
+			result = cursor.fetchone()
+			return result[0]
 		except BadRequest as e:
 			abort(400,message=e.description)
 		except Unauthorized	as e:
