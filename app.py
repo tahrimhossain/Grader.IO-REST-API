@@ -874,7 +874,16 @@ class SubmitReview(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL submitReview(%s,%s,%s,%s)',(data['submission_id'],payload['email'],data['assigned_score'],data['content']))
 			connection.commit()
-			return {"message":"Successfully submitted"}
+			
+			cursor.callproc('getSubmissionDetail',(data['submission_id'],))
+			submission_detail = cursor.fetchone()
+
+			cursor.callproc('getAssignmentDetail',(submission_detail[0]['assignment_id'],))
+			assignment_detail = cursor.fetchone()
+
+			cursor.callproc('getCreatedReviewForSubmission',(data['submission_id'],payload['email'],))
+			review_detail = cursor.fetchone()
+			return {"current_state_of_assignment":assignment_detail[0]["current_state"],"max_score":assignment_detail[0]["max_score"],"detail":review_detail[0]}
 		except Unauthorized	as e:
 			abort(401,message=e.description)	
 		except InvalidSignatureError as e:
@@ -909,7 +918,12 @@ class SaveSubmission(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL saveSubmission(%s,%s,%s)',(data['assignment_id'],payload['email'],data['content']))
 			connection.commit()
-			return {"message":"Successfully saved"}
+
+			cursor.callproc('getAssignmentDetail',(data['assignment_id'],))
+			assignment_detail = cursor.fetchone()
+			cursor.callproc('getCreatedSubmissionDetail',(data['assignment_id'],payload['email'],))
+			submission_detail = cursor.fetchone()
+			return {"current_state_of_assignment":assignment_detail[0]["current_state"],"detail":submission_detail[0]}
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
@@ -948,7 +962,12 @@ class SubmitSubmission(Resource):
 			payload = jwt.decode(token,key=access_token_secret_key,verify=True,algorithms = ["HS256"])
 			cursor.execute('CALL submitSubmission(%s,%s,%s)',(data['assignment_id'],payload['email'],data['content']))
 			connection.commit()
-			return {"message":"Successfully submitted"}
+			
+			cursor.callproc('getAssignmentDetail',(data['assignment_id'],))
+			assignment_detail = cursor.fetchone()
+			cursor.callproc('getCreatedSubmissionDetail',(data['assignment_id'],payload['email'],))
+			submission_detail = cursor.fetchone()
+			return {"current_state_of_assignment":assignment_detail[0]["current_state"],"detail":submission_detail[0]}
 		except BadRequest as e:
 			abort(400,message=e.description)	
 		except Unauthorized	as e:
